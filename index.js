@@ -1,48 +1,49 @@
 'use strict';
 
-const searchTerm= $('#js-search').val();
+const searchURL = 'https://api.github.com/users/';
 
 function displayResults(responseJson) {
+  // if there are previous results, remove them
   console.log(responseJson);
-  //$('#insertUsername').append(`${searchTerm}`)
-  //$('#results-list').empty();
-  //$('#results').empty();
-  //$('#results').append(`
-    //<h3>Search Results For ${searchTerm}</h3>
-  //  `);
-
-  for (let i=0; i<responseJson.length; i++){
+  $('#results-list').empty();
+  // iterate through the articles array, stopping at the max number of results
+  for (let i = 0; i < responseJson.length; i++){
 
     $('#results-list').append(
-      `<li>
-      <p>Repo Name:<a href="${responseJson[i].name}"></a></p>
-      <p>Link:<a href="${responseJson[i].html_url}"></a></p>
+      `<li><h3>${responseJson[i].name}</h3>
+      <p>${responseJson[i].html_url}</p>
+      </li>`
+    )};
+  //display the results section
+  $('#results').removeClass('hidden');
+};
 
-      </li>`);
+function getRepos(query) {
+  const queryString = `${query}/repos`
 
-      $('#results').removeclass('hidden');
-    }
-}
+  const url = searchURL + queryString;
 
-function getResults() {
+  console.log(url);
 
-  fetch(`https://api.github.com/users/${searchTerm}/repos`)
-    .then(response=> {
+  fetch(url)
+    .then(response => {
       if (response.ok) {
-        return response.Json();
+        return response.json();
       }
       throw new Error(response.statusText);
     })
     .then(responseJson => displayResults(responseJson))
-      .catch(err => {
-        $('#js-error-message').text(`Something went wrong: ${err.message}`)
-      });
-}
+    .catch(err => {
+      $('#js-error-message').text(`Something went wrong: ${err.message}`);
+    });
+  }
 
-function formWatch() {
-  $('#js-submit').submit(function(e) {
-    e.preventDefault();
-    getResults();
+function watchForm() {
+  $('form').submit(event => {
+    event.preventDefault();
+    const searchTerm = $('#js-search-term').val();
+    getRepos(searchTerm);
   });
 }
-$(formWatch());
+
+$(watchForm);
